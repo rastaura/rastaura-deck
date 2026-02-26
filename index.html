@@ -6,187 +6,57 @@
 <title>RASTAURA — Pitch Deck</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a1a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overflow:hidden;height:100vh;height:100dvh;-webkit-user-select:none;user-select:none}
+html,body{height:100%;height:100dvh;overflow:hidden;background:#0a0a1a}
 
-.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);transition:width .35s ease;z-index:100;border-radius:0 2px 2px 0}
+.deck-frame{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
 
-.slide-wrap{display:flex;align-items:center;justify-content:center;height:100vh;height:100dvh;width:100vw;padding:20px 60px}
-.slide-img{max-width:100%;max-height:calc(100vh - 80px);max-height:calc(100dvh - 80px);border-radius:6px;box-shadow:0 16px 60px rgba(0,0,0,.6);transition:opacity .25s ease}
-.slide-img.loading{opacity:.25}
-
-.nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;font-size:22px;width:44px;height:44px;border-radius:50%;cursor:pointer;transition:all .2s;z-index:10;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.nav:hover{background:rgba(255,255,255,.18)}
-.nav:active{transform:translateY(-50%) scale(.92)}
-.nav-prev{left:14px}
-.nav-next{right:14px}
-
-.footer{position:fixed;bottom:0;left:0;right:0;padding:14px 24px;display:flex;align-items:center;justify-content:center;background:linear-gradient(transparent,rgba(0,0,0,.7))}
-.counter{font-size:13px;color:rgba(255,255,255,.5);letter-spacing:.5px;font-variant-numeric:tabular-nums}
-.brand{position:fixed;bottom:14px;right:24px;font-size:11px;color:rgba(255,255,255,.2);letter-spacing:1px;text-transform:uppercase}
-
-.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;height:100dvh;gap:16px}
-.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.08);border-top-color:#3b82f6;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loader-text{color:rgba(255,255,255,.35);font-size:14px}
-.fallback{margin-top:24px;color:rgba(255,255,255,.25);font-size:12px;text-decoration:underline}
-
-.error-box{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;height:100dvh;gap:12px;padding:40px}
-.error-box h2{color:#ef4444;font-size:18px;font-weight:600}
-.error-box p{color:rgba(255,255,255,.4);font-size:13px;text-align:center;max-width:400px;line-height:1.6}
-.error-box a{color:#3b82f6;text-decoration:underline;font-size:14px;margin-top:8px}
-
-@media(max-width:600px){
-  .slide-wrap{padding:10px 12px}
-  .nav{width:36px;height:36px;font-size:18px}
-  .nav-prev{left:6px}
-  .nav-next{right:6px}
-}
+.brand{position:fixed;bottom:10px;right:16px;font-size:10px;color:rgba(255,255,255,.15);letter-spacing:1px;text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;pointer-events:none;z-index:10}
 </style>
 </head>
 <body>
 
-<div id="loader" class="loader">
-  <div class="spinner"></div>
-  <div class="loader-text">Loading presentation&hellip;</div>
-  <a class="fallback" href="https://docs.google.com/presentation/d/10esAArSI2Mpz97EVjUtNqsgg7PVyHVG2lsmtVR9tZ4k/pub?start=false&loop=false" target="_blank">Taking too long? View deck directly</a>
-</div>
+<iframe
+  class="deck-frame"
+  src="https://docs.google.com/presentation/d/10esAArSI2Mpz97EVjUtNqsgg7PVyHVG2lsmtVR9tZ4k/embed?start=false&loop=false&delayms=60000"
+  allowfullscreen="true"
+  mozallowfullscreen="true"
+  webkitallowfullscreen="true"
+></iframe>
 
-<div id="viewer" style="display:none">
-  <div class="progress" id="progress"></div>
-  <div class="slide-wrap">
-    <img id="slideImg" class="slide-img" alt="" draggable="false" />
-  </div>
-  <button class="nav nav-prev" id="btnPrev" aria-label="Previous slide">&#8249;</button>
-  <button class="nav nav-next" id="btnNext" aria-label="Next slide">&#8250;</button>
-  <div class="footer"><span class="counter" id="counter"></span></div>
-  <div class="brand">RASTAURA</div>
-</div>
+<div class="brand">RASTAURA</div>
 
 <script>
-// ─── CONFIGURATION ─────────────────────────────────────────
-// Paste your deployed Apps Script Web App URL here:
 var TRACKER_URL = "https://script.google.com/macros/s/AKfycbwBUOJz5AtZORmRnrbP9meNUZO1ux8K0s4B4-9-MvVpfTWlTjoLcUaDUEurdeIEi3Mchw/exec";
-var SLIDES_FALLBACK = "https://docs.google.com/presentation/d/10esAArSI2Mpz97EVjUtNqsgg7PVyHVG2lsmtVR9tZ4k/pub?start=false&loop=false";
-// ────────────────────────────────────────────────────────────
 
 var params = new URLSearchParams(location.search);
 var EMAIL_ID = params.get("id") || "unknown";
 var SESSION = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-
-var slides = [];
-var cur = 0;
-var enterTime = null;
 var openTime = Date.now();
-var cache = {};
-
-// ─── Load slide data via JSONP ─────────────────────────────
-
-function onSlideData(data) {
-  slides = data;
-  document.getElementById("loader").style.display = "none";
-  document.getElementById("viewer").style.display = "block";
-  show(0);
-  track("deck_open", 1, 0);
-}
-
-var tag = document.createElement("script");
-tag.src = TRACKER_URL + "?type=slides_data&callback=onSlideData";
-tag.onerror = function () {
-  var el = document.getElementById("loader");
-  el.className = "error-box";
-  el.innerHTML = '<h2>Could not load slides</h2>' +
-    '<p>The slide server did not respond. You can view the deck directly instead.</p>' +
-    '<a href="' + SLIDES_FALLBACK + '" target="_blank">Open Pitch Deck &rarr;</a>';
-};
-
-var timeout = setTimeout(function () {
-  if (slides.length === 0) tag.onerror();
-}, 15000);
-
-document.head.appendChild(tag);
-
-// ─── Display a slide ───────────────────────────────────────
-
-function show(idx) {
-  if (idx < 0 || idx >= slides.length) return;
-
-  if (enterTime !== null && cur !== idx) {
-    track("slide_time", cur + 1, secs(enterTime));
-  }
-
-  cur = idx;
-  enterTime = Date.now();
-
-  var img = document.getElementById("slideImg");
-  if (cache[idx]) {
-    img.src = cache[idx];
-    img.className = "slide-img";
-  } else {
-    img.className = "slide-img loading";
-    img.onload = function () { img.className = "slide-img"; cache[idx] = img.src; };
-    img.onerror = function () { img.className = "slide-img"; };
-    img.src = slides[idx].url;
-  }
-
-  document.getElementById("counter").textContent = (idx + 1) + " / " + slides.length;
-  document.getElementById("progress").style.width = ((idx + 1) / slides.length * 100) + "%";
-  document.getElementById("btnPrev").style.display = idx === 0 ? "none" : "flex";
-  document.getElementById("btnNext").style.display = idx === slides.length - 1 ? "none" : "flex";
-
-  track("slide_view", idx + 1, 0);
-  preload(idx + 1);
-  preload(idx - 1);
-}
-
-function preload(idx) {
-  if (idx >= 0 && idx < slides.length && !cache[idx]) {
-    var i = new Image();
-    i.onload = function () { cache[idx] = i.src; };
-    i.src = slides[idx].url;
-  }
-}
+var tracked = false;
 
 function secs(t) { return Math.round((Date.now() - t) / 1000); }
 
-// ─── Tracking via invisible img tags ───────────────────────
-
-function track(event, slide, dur) {
+function track(event, dur) {
   var i = new Image();
   i.src = TRACKER_URL + "?type=slide&id=" + encodeURIComponent(EMAIL_ID) +
-    "&event=" + event + "&slide=" + slide + "&dur=" + dur +
+    "&event=" + event + "&slide=0&dur=" + dur +
     "&session=" + SESSION + "&t=" + Date.now();
 }
 
-// ─── Navigation ────────────────────────────────────────────
-
-document.getElementById("btnNext").addEventListener("click", function () { show(cur + 1); });
-document.getElementById("btnPrev").addEventListener("click", function () { show(cur - 1); });
-
-document.addEventListener("keydown", function (e) {
-  if (e.key === "ArrowRight" || e.key === " ") show(cur + 1);
-  if (e.key === "ArrowLeft") show(cur - 1);
-});
-
-var touchX = 0;
-document.addEventListener("touchstart", function (e) { touchX = e.touches[0].clientX; }, { passive: true });
-document.addEventListener("touchend", function (e) {
-  var dx = e.changedTouches[0].clientX - touchX;
-  if (Math.abs(dx) > 50) { dx < 0 ? show(cur + 1) : show(cur - 1); }
-});
-
-// ─── Exit tracking ─────────────────────────────────────────
+track("deck_open", 0);
 
 function onExit() {
-  if (!enterTime) return;
-  track("slide_time", cur + 1, secs(enterTime));
-  track("deck_close", cur + 1, secs(openTime));
-  enterTime = null;
+  if (tracked) return;
+  tracked = true;
+  track("deck_close", secs(openTime));
 }
 
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "hidden") onExit();
+  if (document.visibilityState === "visible") tracked = false;
 });
 window.addEventListener("pagehide", onExit);
+window.addEventListener("beforeunload", onExit);
 </script>
 </body>
 </html>
