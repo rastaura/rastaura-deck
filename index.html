@@ -1,62 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>RASTAURA — Pitch Deck</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;height:100dvh;overflow:hidden;background:#0a0a1a}
-
-.deck-frame{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
-
-.brand{position:fixed;bottom:10px;right:16px;font-size:10px;color:rgba(255,255,255,.15);letter-spacing:1px;text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;pointer-events:none;z-index:10}
-</style>
-</head>
-<body>
-
-<iframe
-  class="deck-frame"
-  src="https://docs.google.com/presentation/d/10esAArSI2Mpz97EVjUtNqsgg7PVyHVG2lsmtVR9tZ4k/embed?start=false&loop=false&delayms=60000"
-  allowfullscreen="true"
-  mozallowfullscreen="true"
-  webkitallowfullscreen="true"
-></iframe>
-
-<div class="brand">RASTAURA</div>
-
 <script>
-var TRACKER_URL = "https://script.google.com/macros/s/AKfycbwBUOJz5AtZORmRnrbP9meNUZO1ux8K0s4B4-9-MvVpfTWlTjoLcUaDUEurdeIEi3Mchw/exec";
+var T = "https://script.google.com/macros/s/AKfycbwBUOJz5AtZORmRnrbP9meNUZO1ux8K0s4B4-9-MvVpfTWlTjoLcUaDUEurdeIEi3Mchw/exec";
+var S = "https://docs.google.com/presentation/d/10esAArSI2Mpz97EVjUtNqsgg7PVyHVG2lsmtVR9tZ4k/edit";
 
-var params = new URLSearchParams(location.search);
-var EMAIL_ID = params.get("id") || "unknown";
-var SESSION = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-var openTime = Date.now();
-var tracked = false;
+var p = new URLSearchParams(location.search);
+var id = p.get("id") || "unknown";
 
-function secs(t) { return Math.round((Date.now() - t) / 1000); }
+var ua = navigator.userAgent;
+var mobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+var tablet = /iPad|Android(?!.*Mobile)/i.test(ua);
+var deviceType = tablet ? "tablet" : mobile ? "mobile" : "desktop";
+var browser = /Edg/i.test(ua) ? "Edge" : /OPR|Opera/i.test(ua) ? "Opera" : /Chrome/i.test(ua) ? "Chrome" : /Safari/i.test(ua) ? "Safari" : /Firefox/i.test(ua) ? "Firefox" : "Other";
+var os = /Windows/i.test(ua) ? "Windows" : /Mac/i.test(ua) ? "macOS" : /Linux/i.test(ua) ? "Linux" : /Android/i.test(ua) ? "Android" : /iPhone|iPad|iPod/i.test(ua) ? "iOS" : "Other";
 
-function track(event, dur) {
-  var i = new Image();
-  i.src = TRACKER_URL + "?type=slide&id=" + encodeURIComponent(EMAIL_ID) +
-    "&event=" + event + "&slide=0&dur=" + dur +
-    "&session=" + SESSION + "&t=" + Date.now();
-}
+var d = encodeURIComponent(JSON.stringify({
+  type: deviceType,
+  browser: browser,
+  os: os,
+  screen: screen.width + "x" + screen.height,
+  dpr: window.devicePixelRatio || 1,
+  lang: navigator.language,
+  tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  touch: navigator.maxTouchPoints > 0,
+  ref: document.referrer
+}));
 
-track("deck_open", 0);
+new Image().src = T + "?type=deck_click&id=" + encodeURIComponent(id) + "&d=" + d + "&t=" + Date.now();
 
-function onExit() {
-  if (tracked) return;
-  tracked = true;
-  track("deck_close", secs(openTime));
-}
-
-document.addEventListener("visibilitychange", function () {
-  if (document.visibilityState === "hidden") onExit();
-  if (document.visibilityState === "visible") tracked = false;
-});
-window.addEventListener("pagehide", onExit);
-window.addEventListener("beforeunload", onExit);
+window.location.replace(S);
 </script>
-</body>
+</head>
+<body></body>
 </html>
