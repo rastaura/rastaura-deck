@@ -27,9 +27,13 @@ var d = encodeURIComponent(JSON.stringify({
   ref: document.referrer
 }));
 
-new Image().src = T + "?type=deck_click&id=" + encodeURIComponent(id) + "&d=" + d + "&t=" + Date.now();
+var trackUrl = T + "?type=deck_click&id=" + encodeURIComponent(id) + "&d=" + d + "&t=" + Date.now();
 
-window.location.replace(S);
+// keepalive ensures the request survives page navigation (critical for mobile)
+try { fetch(trackUrl, { mode: "no-cors", keepalive: true }); } catch(e) {}
+new Image().src = trackUrl;
+
+setTimeout(function() { window.location.replace(S); }, 80);
 </script>
 </head>
 <body></body>
