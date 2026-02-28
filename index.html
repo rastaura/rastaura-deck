@@ -12,8 +12,8 @@ var ua = navigator.userAgent;
 var mobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
 var tablet = /iPad|Android(?!.*Mobile)/i.test(ua);
 var deviceType = tablet ? "tablet" : mobile ? "mobile" : "desktop";
-var browser = /Edg/i.test(ua) ? "Edge" : /OPR|Opera/i.test(ua) ? "Opera" : /Chrome/i.test(ua) ? "Chrome" : /Safari/i.test(ua) ? "Safari" : /Firefox/i.test(ua) ? "Firefox" : "Other";
-var os = /Windows/i.test(ua) ? "Windows" : /Mac/i.test(ua) ? "macOS" : /Linux/i.test(ua) ? "Linux" : /Android/i.test(ua) ? "Android" : /iPhone|iPad|iPod/i.test(ua) ? "iOS" : "Other";
+var browser = /EdgiOS|Edg/i.test(ua) ? "Edge" : /OPR|Opera/i.test(ua) ? "Opera" : /CriOS|Chrome/i.test(ua) ? "Chrome" : /FxiOS|Firefox/i.test(ua) ? "Firefox" : /Safari/i.test(ua) ? "Safari" : "Other";
+var os = /iPhone|iPad|iPod/i.test(ua) ? "iOS" : /Android/i.test(ua) ? "Android" : /Windows/i.test(ua) ? "Windows" : /Mac/i.test(ua) ? "macOS" : /Linux/i.test(ua) ? "Linux" : "Other";
 
 var d = encodeURIComponent(JSON.stringify({
   type: deviceType,
